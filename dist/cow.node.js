@@ -2167,27 +2167,32 @@ Cow.websocket.prototype.connect = function() {
         if (!self._connection || self._connection.readyState != 1 || self._connection.state != 'open') //if no connection
         {
             if(self._url.indexOf('ws') === 0) {
-                var connection = null;
-                connection = new WebSocket();
-                connection.on('connectFailed', function(error) {
-                    console.log('Connect Error: ' + error.toString());
-                });
-                connection.on('connect', function(conn) {
-                    console.log('WebSocket client connected');
-                    conn.on('error', self._onError);
-                    conn.on('message', function(message) {
-                        if (message.type === 'utf8') {
-                            //console.log("Received: '" + message.utf8Data + "'");
-                            self._onMessage({data:message.utf8Data});
-                        }
-                    });
-                    conn.obj = self;
-                    self._connection = conn;
-                });
-                //TODO: there is some issue with the websocket module,ssl and certificates
-                //This param should be added: {rejectUnauthorized: false}
-                //according to: http://stackoverflow.com/questions/18461979/node-js-error-with-ssl-unable-to-verify-leaf-signature#20408031
-                connection.connect(self._url, 'connect');
+            	try {
+					var connection = null;
+					connection = new WebSocket();
+					connection.on('connectFailed', function(error) {
+						console.log('Connect Error: ' + error.toString());
+					});
+					connection.on('connect', function(conn) {
+						console.log('WebSocket client connected');
+						conn.on('error', self._onError);
+						conn.on('message', function(message) {
+							if (message.type === 'utf8') {
+								//console.log("Received: '" + message.utf8Data + "'");
+								self._onMessage({data:message.utf8Data});
+							}
+						});
+						conn.obj = self;
+						self._connection = conn;
+					});
+					//TODO: there is some issue with the websocket module,ssl and certificates
+					//This param should be added: {rejectUnauthorized: false}
+					//according to: http://stackoverflow.com/questions/18461979/node-js-error-with-ssl-unable-to-verify-leaf-signature#20408031
+					connection.connect(self._url, 'connect');
+				}
+				catch (e){
+					reject(e);
+				}
             }
             else {
                 console.warn('Incorrect URL: ' + self._url);

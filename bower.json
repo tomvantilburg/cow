@@ -28,6 +28,7 @@
   ],
   "dependencies": {
     "es6-promise": "^3.2.1",
-    "underscore": "~1"
+    "underscore": "~1",
+    "pouchdb": "^6.1.0"
   }
 }

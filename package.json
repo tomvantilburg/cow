@@ -6,13 +6,17 @@
   "devDependencies": {
     "grunt": "~0.4.4",
     "grunt-cli": "~0.1.13",
-    "grunt-contrib-uglify": "0.7.0",
     "grunt-contrib-concat": "1.0.0",
+    "grunt-contrib-uglify": "0.7.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-replace": "^0.8.0",
     "jshint-stylish": "^0.2.0",
     "load-grunt-configs": "^0.4.0",
     "load-grunt-tasks": "^0.6.0",
+    "tap-spec": "^4.1.1",
     "time-grunt": "~0.3.1"
+  },
+  "scripts": {
+    "test": "node ./test/tape-tests.js | tap-spec"
   }
 }
