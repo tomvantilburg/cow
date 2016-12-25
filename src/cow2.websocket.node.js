@@ -30,9 +30,6 @@ Cow.websocket.prototype.disconnect = function() {
         this._connection.close();    
         this._connection = null;
     }
-    else { 
-        console.log('No websocket active');
-    }
 };
 
     /**
@@ -45,52 +42,57 @@ Cow.websocket.prototype.connect = function() {
         if (core.socketserver()){
             self._url = core.socketserver().url(); //get url from list of socketservers
         }
+        else {
+            self._url = null;
+            reject('No valid socketserver selected');
+        }
         
         if (!self._url) {
-            console.warn('Nu URL given to connect to. Make sure you give a valid socketserver id as connect(id)');
-            reject();
-            return false;
+            reject('No URL given to connect to. Make sure you give a valid socketserver id as connect(id)');
         }
     
         if (!self._connection || self._connection.readyState != 1 || self._connection.state != 'open') //if no connection
         {
             if(self._url.indexOf('ws') === 0) {
-            	try {
-					var connection = null;
-					connection = new WebSocket();
-					connection.on('connectFailed', function(error) {
-						console.log('Connect Error: ' + error.toString());
-					});
-					connection.on('connect', function(conn) {
-						console.log('WebSocket client connected');
-						conn.on('error', self._onError);
-						conn.on('message', function(message) {
-							if (message.type === 'utf8') {
-								//console.log("Received: '" + message.utf8Data + "'");
-								self._onMessage({data:message.utf8Data});
-							}
-						});
-						conn.obj = self;
-						self._connection = conn;
-					});
-					//TODO: there is some issue with the websocket module,ssl and certificates
-					//This param should be added: {rejectUnauthorized: false}
-					//according to: http://stackoverflow.com/questions/18461979/node-js-error-with-ssl-unable-to-verify-leaf-signature#20408031
-					connection.connect(self._url, 'connect');
-				}
-				catch (e){
-					reject(e);
-				}
+              try {
+				var connection = null;
+                connection = new WebSocket();
+                connection.on('connectFailed', function(error) {
+                    reject('Connect Error: ' + error.toString());
+                });
+                connection.on('connect', function(conn) {
+                    conn.on('error', self._onError);
+                    conn.on('close', function(){
+                    	core.websocket().trigger('notice','socket closed');
+                    });
+                    conn.on('message', function(message) {
+                        if (message.type === 'utf8') {
+                            //console.log("Received: '" + message.utf8Data + "'");
+                            self._onMessage({data:message.utf8Data});
+                        }
+                    });
+                    conn.obj = self;
+                    self._connection = conn;
+                    resolve(self._connection);
+                });
+                //TODO: there is some issue with the websocket module,ssl and certificates
+                //This param should be added: {rejectUnauthorized: false}
+                //according to: http://stackoverflow.com/questions/18461979/node-js-error-with-ssl-unable-to-verify-leaf-signature#20408031
+                connection.connect(self._url, 'connect');
+              }
+              catch (e){
+              	  reject(e);
+              }
             }
             else {
-                console.warn('Incorrect URL: ' + self._url);
-                reject();
+                reject('Incorrect URL: ' + self._url);
             }
         }
         else {
             connection = self._connection;
+            resolve(self._connection);
         }
-        recolve(connection);
+        
     });
     return promise;
 };
@@ -114,11 +116,11 @@ Cow.websocket.prototype._onMessage = function(message){
 Cow.websocket.prototype._onError = function(e){
     this._core.peerStore().clear();
     this._connected = false;
-    console.warn('error in websocket connection: ' + e.type);
-    this._core.websocket().trigger('error');
+    this._core.websocket().trigger('error','error in websocket connection: ' + e.type);
 };
-Cow.websocket.prototype._onError = function(e){
-    console.log('closed');
+
+Cow.websocket.prototype._onClose = function(event){
+	this.trigger('notice','socket closed');
 };
 _.extend(Cow.websocket.prototype, Events);
 }.call(this));

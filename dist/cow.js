@@ -670,7 +670,8 @@ Cow.localdb.prototype.write = function(config){
             console.warn('Abort error');
         };
         var store = trans.objectStore(storename);
-        var request = store.put(record);
+        //parse / stringify will remove artifacts from other libs
+        var request = store.put(JSON.parse(JSON.stringify(record)));
         request.onsuccess = function(e) {
             resolve(request.result);
         };
@@ -698,8 +699,9 @@ Cow.localdb.prototype.writeAll = function(config){
             var record = list[i];
             record._id = record._id.toString();
             record.projectid = projectid;
-            var request = store.put(record);
-            request.onsuccess = function(e) {
+            //parse / stringify will remove artifacts from other libs
+            var request = store.put(JSON.parse(JSON.stringify(record)));
+        	request.onsuccess = function(e) {
                 //continue
             };
             request.onerror = function(e) {
@@ -2193,9 +2195,6 @@ Cow.websocket.prototype.disconnect = function() {
         this._connection = null;
         this._connected = false;
     }
-    else { 
-        console.log('No websocket active');
-    }
 };
 
     /**
@@ -2209,13 +2208,12 @@ Cow.websocket.prototype.connect = function() {
             self._url = core.socketserver().url(); //get url from list of socketservers
         }
         else {
-            console.warn('No valid socketserver selected');
             self._url = null;
+            reject('No valid socketserver selected');
         }
         
         if (!self._url) {
-            console.warn('Nu URL given to connect to. Make sure you give a valid socketserver id as connect(id)');
-            reject();
+            reject('No URL given to connect to. Make sure you give a valid socketserver id as connect(id)');
         }
         
         var connectpromise;
@@ -2234,8 +2232,7 @@ Cow.websocket.prototype.connect = function() {
                 self._connected = true;//TODO, perhaps better to check if the connection really works
             }
             else {
-                console.warn('Incorrect URL: ' + self._url);
-                reject();
+                reject('Incorrect URL: ' + self._url);
             }
         }
         else {
@@ -2268,7 +2265,6 @@ Cow.websocket.prototype._onMessage = function(message){
 Cow.websocket.prototype._onError = function(e){
     this._core.peerStore().clear();
     this._connected = false;
-    console.warn('error in websocket connection: ' + e.type);
     this._core.websocket().trigger('error',e);
 };
 
@@ -2278,22 +2274,23 @@ Cow.websocket.prototype._onClose = function(event){
     var reason = event.reason;
     var wasClean = event.wasClean;
     
-    console.log('WS disconnected:' , code, reason);
+    var notice = 'WS disconnected: ' + code + reason;
+    this._core.websocket().trigger('notice',notice);
     this._core.peerStore().clear();
     this._connected = false;
     var self = this;
     var restart = function(){
         try{
-            console.log('Trying to reconnect');
+        	self._core.websocket().trigger('notice','Trying to reconnect');
             self._core.websocket().disconnect();
         }
         catch(err){
-            console.warn(err);
+        	self._core.websocket().trigger('notice',err);
         }
         self._core.websocket().connect().then(function(d){
            self._connection = d;
         }, function(e){
-            console.warn('connection failed',e);
+        	self._core.websocket().trigger('notice',e);
         });
     };
     if (this._core._autoReconnect){
@@ -2303,77 +2300,6 @@ Cow.websocket.prototype._onClose = function(event){
 
 _.extend(Cow.websocket.prototype, Events);
 }.call(this));
-/*TT:
-Added this from https://gist.github.com/revolunet/843889
-to enable LZW encoding
-*/
-// LZW-compress a string
-function lzw_encode(s) {
-    var dict = {};
-    var data = (s + "").split("");
-    var out = [];
-    var currChar;
-    var phrase = data[0];
-    var code = 256;
-    for (var i=1; i<data.length; i++) {
-        currChar=data[i];
-        if (dict[phrase + currChar] != null) {
-            phrase += currChar;
-        }
-        else {
-            out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-            dict[phrase + currChar] = code;
-            code++;
-            phrase=currChar;
-        }
-    }
-    out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-    for (var i=0; i<out.length; i++) {
-        out[i] = String.fromCharCode(out[i]);
-    }
-    return out.join("");
-}
-
-// Decompress an LZW-encoded string
-function lzw_decode(s) {
-    var dict = {};
-    var data = (s + "").split("");
-    var currChar = data[0];
-    var oldPhrase = currChar;
-    var out = [currChar];
-    var code = 256;
-    var phrase;
-    for (var i=1; i<data.length; i++) {
-        var currCode = data[i].charCodeAt(0);
-        if (currCode < 256) {
-            phrase = data[i];
-        }
-        else {
-           phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
-        }
-        out.push(phrase);
-        currChar = phrase.charAt(0);
-        dict[code] = oldPhrase + currChar;
-        code++;
-        oldPhrase = phrase;
-    }
-    return out.join("");
-}
-function encode_utf8(s) {
-  return unescape(encodeURIComponent(s));
-}
-
-function decode_utf8(s) {
-try{
-  return decodeURIComponent(escape(s));
-}
-catch(e){
-	console.warn(e,s);
-	debugger;
-}
-}
-
-
 (function(){
 
 var root = this;
@@ -2446,7 +2372,7 @@ Cow.messenger.prototype.sendData = function(data, action, target){
     message.sender = this._core.peerid();
     message.target = target;
     message.action = action;
-    message.payload = lzw_encode(encode_utf8(JSON.stringify(data)));
+    message.payload = lzwCompress.pack(data);
     var stringified;
     var endcoded;
     try {
@@ -2460,22 +2386,30 @@ Cow.messenger.prototype.sendData = function(data, action, target){
     this._amountsend = +stringified.length;
 };
 
+Cow.messenger.prototype._onError = function(error){
+	//TODO: propagate
+};
+
 Cow.messenger.prototype._onMessage = function(message){
     var core = this._core;
     var data = JSON.parse(message.data); //TODO: catch parse errors
     var sender = data.sender;
     var PEERID = core.peerid(); 
     var action = data.action;        
-    if (typeof(data.payload) == 'object'){
-    	data.payload = data.payload;
+    if (data.action == 'connected'){
+		data.payload = data.payload;
     }
     else {
-    	data.payload = JSON.parse(decode_utf8(lzw_decode(data.payload)));
+    	try {
+    		data.payload = lzwCompress.unpack(data.payload);
+    	}
+    	catch(e){
+    		this.trigger('notice','Error in lzwCompress ' + e);
+    	}
     }
     var payload = data.payload;
     var target = data.target;
     if (sender != PEERID){
-        //console.info('Receiving '+JSON.stringify(data));
         this._core.messenger()._numreqs++;
         this._core.messenger()._amountreq = +message.data.length;
     }
@@ -2558,7 +2492,6 @@ _onConnect handles 2 things
 **/
 
 Cow.messenger.prototype._onConnect = function(payload){
-    console.log('connected!');
     this._connected = true;
     var self = this;
     this._core.peerid(payload.peerID);
@@ -2569,13 +2502,13 @@ Cow.messenger.prototype._onConnect = function(payload){
     var now = new Date().getTime();
     var maxdiff = 1000 * 60 * 5; //5 minutes
     if (Math.abs(servertime - now) > maxdiff){
-        console.warn('Time difference between server and client larger ('+Math.abs(servertime-now)+'ms) than allowed ('+maxdiff+' ms).');
+        self.trigger('notice','Time difference between server and client larger ('+Math.abs(servertime-now)+'ms) than allowed ('+maxdiff+' ms).');
         self.ws.disconnect();
         return;
     }
             
     if (serverkey !== undefined && serverkey != this._core._herdname){
-        console.warn('Key on server ('+serverkey+') not the same as client key ('+this._core._herdname+').');
+        self.trigger('notice','Key on server ('+serverkey+') not the same as client key ('+this._core._herdname+').');
         self.ws.disconnect();
         return;
     }
@@ -2911,7 +2844,7 @@ Cow.core = function(config){
     if (typeof(config) == 'undefined' ) {
         config = {};
     }
-    this._version = '2.2.5';
+    this._version = '2.3.0-rc1';
     this._herdname = config.herdname || 'cow';
     this._userid = null;
     this._socketserverid = null;

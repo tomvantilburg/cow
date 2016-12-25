@@ -8,8 +8,8 @@
   <!-- Bootstrap -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-  
   <script src="../bower_components/underscore/underscore-min.js"></script>
+  <script src="../bower_components/lzwCompress.js/lzwCompress.js"></script>
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
   <script src="../dist/cow.js"></script>
@@ -112,7 +112,7 @@
   <script type="text/javascript">
   var us = _;
   var core = new Cow.core({
-    herdname: 'wetterskip',//'eagle',
+    herdname: 'test',//'eagle',
     maxage: 1000 * 60 * 60 * 24 * 30 //30 days
   });
 
@@ -121,6 +121,7 @@
   });
   core.projectStore().loaded.then(function(){
           console.log('Projectstore loaded');
+          /*
           if (core.projects()[0]){
               core.project(core.projects()[0].id());
               core.project().itemStore().on('datachange', function(){
@@ -131,13 +132,14 @@
               else
                   core.project().items({}).data('test', 'test1').sync();
           };
+          */
   });
 
   //add a default socketserver
   core.socketservers({
     _id: 'default',
     //data: {protocol:'wss',ip:'websocket.geodan.nl', port:443, dir: 'eagle'}
-    data: {protocol:'wss',ip:'websocket.geodan.nl', port:443, dir: 'wetterskip'}
+    data: {protocol:'wss',ip:'websocket.geodan.nl', port:443, dir: 'test'}
     //data: {protocol:'ws',ip:'192.168.24.95', port:8081}
   });
   core.socketserver('default');
