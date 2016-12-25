@@ -1,7 +1,8 @@
 node_modules
 bower_components
 .npm-debug.log
-#dist
+npm-debug.log
+dist
 #cow.js
 #cow.min.js
 #cow.nodb.js
