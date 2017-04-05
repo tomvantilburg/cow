@@ -1,0 +1,1 @@
+export {Cow as core} from "./src/cow2.core";

@@ -1,27 +1,35 @@
 {
   "name": "cow",
-  "version": "2.3.0-rc1",
+  "version": "2.3.0",
+  "description": "Concurrent Online Workspace",
+  "homepage": "http://research.geodan.nl/sites/cow",
+  "license": "MIT",
+  "main": "dist/cow.node.js",
+  "browser": "dist/cow.js",
+  "module": "index",
+  "jsnext:main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Geodan/cow.git"
+  },
   "author": "Geodan Research",
-  "private": true,
+  "private": false,
+  "dependencies": {
+    "lzwcompress": "^0.2.4",
+    "underscore": "^1.8.3"
+  },
   "devDependencies": {
-    "grunt": "~0.4.4",
-    "grunt-cli": "~0.1.13",
-    "grunt-contrib-uglify": "0.7.0",
-    "grunt-contrib-concat": "1.0.0",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-replace": "^0.8.0",
-    "jshint-stylish": "^0.2.0",
-    "load-grunt-configs": "^0.4.0",
-    "load-grunt-tasks": "^0.6.0",
-    "time-grunt": "~0.3.1",
-    "karma": "~0.12.16",
-    "karma-chrome-launcher": "~0.1.4",
-    "karma-coverage": "0.5.2",
-    "karma-firefox-launcher": "^0.1.3",
-    "karma-ie-launcher": "^0.2.0",
-    "karma-jasmine": "^0.2.2",
-    "karma-junit-reporter": "^0.2.2",
-    "karma-spec-reporter": "~0.0.13",
-    "grunt-karma": "0.8.3"
+    "tap-spec": "^4.1.1",
+    "eslint": "3",
+    "package-preamble": "0.0",
+    "rollup": "0.36",
+    "tape": "4",
+    "uglify-js": "2"
+  },
+  "scripts": {
+    "pretest": "rm -rf dist && mkdir dist && concat-glob-cli -f src/cow2.*.js src/events.js -o dist/cow.js",
+    "test": "tape 'test/*-tests.js' && eslint dist/cow.js",
+    "prepublish": "npm run test && uglifyjs --preamble \"$(preamble)\" cow/cow.js -c -m -o dist/cow.min.js",
+    "postpublishxx": "VERSION=`node -e 'console.log(require(\"./package.json\").version)'`; git push && git push --tags && cd ../cow.github.com && git pull && cp ../cow/dist/cow.js cow.js && cp ../cow/dist/cow.min.js cow.min.js && git add cow.js cow.min.js && git commit -m \"cow ${VERSION}\" && git push && cd - && zip -j dist/cow.zip -- LICENSE README.md dist/cow.js dist/cow.min.js"
   }
 }

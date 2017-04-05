@@ -54,7 +54,8 @@ Cow.websocket.prototype.connect = function() {
         if (!self._connection || self._connection.readyState != 1 || self._connection.state != 'open') //if no connection
         {
             if(self._url.indexOf('ws') === 0) {
-                var connection = null;
+              try {
+				var connection = null;
                 connection = new WebSocket();
                 connection.on('connectFailed', function(error) {
                     reject('Connect Error: ' + error.toString());
@@ -78,7 +79,10 @@ Cow.websocket.prototype.connect = function() {
                 //This param should be added: {rejectUnauthorized: false}
                 //according to: http://stackoverflow.com/questions/18461979/node-js-error-with-ssl-unable-to-verify-leaf-signature#20408031
                 connection.connect(self._url, 'connect');
-                
+              }
+              catch (e){
+              	  reject(e);
+              }
             }
             else {
                 reject('Incorrect URL: ' + self._url);
