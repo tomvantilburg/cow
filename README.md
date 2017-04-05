@@ -87,6 +87,11 @@ All *record objects* behave the same* and as follows (item object as example):
 `````javascript
     item.id() -> returns the id of the record
     item.created() -> returns the timestamp of creation
+    item.ttl() -> returns the time to live (in ms) for the record
+    items.ttl(integer) -> sets the time to live (in ms) for the record, returns record
+    items.expired() -> returns true/false wether time to live is exceeded
+    item.creator() -> returns the user object that created the item
+    item.touch() -> sets the updated timestamp to now, returns record
     item.dirty() -> returns the dirtystatus of the record
     item.dirty(boolean) -> sets the dirtystatus of the record, returns record
     item.deleted() -> returns a boolean (true, false) indicating wether the record has been deleted
@@ -101,6 +106,10 @@ All *record objects* behave the same* and as follows (item object as example):
     item.data({object}) -> sets the data of the record, overrides old data, returns the record
     item.deltas() -> returns an array with delta objects (see delta)
     item.sync() -> syncs the record with the database and with the websocket
+    
+    EVENTS:
+    item.on('datachange',function(d){ -> fires when the record has been changed
+    item.off('datachange') -> removes the trigger
     
 `````
 **core specific:**
