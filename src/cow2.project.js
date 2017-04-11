@@ -1,17 +1,20 @@
+import {utils} from "./cow2.utils";
 import Record from "./cow2.record";
 import Syncstore from "./cow2.syncstore";
+import Group from "./cow2.group";
+import Item from "./cow2.item";
 
 export default class Project extends Record{
 	constructor(config){
 		super(config);
 		var self = this;
-		this._id = config._id  || cow.Utils.idgen();;
+		this._id = config._id  || utils.idgen();;
 		this._store = config.store;
 		this._core = this._store._core;
 		this._maxAge = this._core._maxAge;
 		
 		var dbname = 'groups';
-		this._groupStore = new cow.Syncstore({
+		this._groupStore = new Syncstore({
 			dbname: dbname, 
 			noIDB: false, 
 			core: self._core, 

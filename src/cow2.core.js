@@ -1,11 +1,13 @@
+import Events from "./events"
 import Localdb from "./cow2.indexeddb"
 import Messenger from "./cow2.messenger"
 import Syncstore from "./cow2.syncstore"
 import Websocket from "./cow2.websocket"
 
-export default class Core {
+export default class Core extends Events{
 	
 	constructor(config){
+		super();
 		var self = this;
 		if (typeof(config) == 'undefined' ) {
 			config = {};

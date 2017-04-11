@@ -21,6 +21,10 @@ core.socketservers({
 });
 core.socketserver('default');
 
+var project = core.projects({_id:'1'});
+core.project('1');
+project.sync();
+
 </script>
 </body>
 </html>
