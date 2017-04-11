@@ -1,12 +1,11 @@
-var tape = require('tape');
+var tape = require("tape"),
+	cow = require("../dist/cow2");
 
-Cow = require('../dist/cow2');
+var item;
 
-var item = new Cow.Item({_id:1});
-
-tape('not throwing up', function (t) {
+tape('Can create item', function (t) {
   t.doesNotThrow(function () {
-    item.id();
+    item = new cow.Item({_id:1});
   });
   t.end();
 });
@@ -17,3 +16,4 @@ tape('idIsString', function(t) {
 	t.equal(expected,actual);
 	t.end();
 });
+

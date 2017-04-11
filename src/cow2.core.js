@@ -30,11 +30,8 @@ export default class Core {
 			noDeltas: false, 
 			core: self, 
 			maxAge: this._maxAge,
-			//FIXME
-			_records: [],
-			_recordproto:   function(_id){return new cow.Project({_id:_id, store: this});},
-			_dbname:        'projects',
-			_type:          'projects'
+			recordproto:   function(_id){return new cow.Project({_id:_id, store: this});},
+			type: 'projects'
 		});
 		
 		
@@ -44,16 +41,13 @@ export default class Core {
 			noIDB: true, 
 			noDeltas: true, 
 			core: this,
-			//FIXME:
-			 _records: [],
 			//prototype for record
-			_recordproto:   function(_id){return new cow.Peer({_id: _id, store: this});}, 
-			_dbname: 'peers',
-			_type: 'peers',
+			recordproto:   function(_id){return new cow.Peer({_id: _id, store: this});}, 
+			type: 'peers',
 			//remove peer from _peers
-			removePeer:         function(id){
-				return this._removeRecord(id);
-			}
+			//FIXMEremovePeer: function(id){
+			//	return this._removeRecord(id);
+			//}
 		});
 		
 		/*USERS*/
@@ -62,12 +56,9 @@ export default class Core {
 			noIDB: false, 
 			noDeltas: true, 
 			core: this,
-			//FIXME:
-			_records: [],
 			//prototype for record
-			_recordproto:   function(_id){return new cow.User({_id: _id, store: this});},     
-			_dbname:        'users',
-			_type:          'users'
+			recordproto:   function(_id){return new cow.User({_id: _id, store: this});},     
+			type: 'users'
 		});
 		
 		/*SOCKETSERVERS*/
@@ -76,12 +67,9 @@ export default class Core {
 			noIDB: false, 
 			noDeltas: true, 
 			core: this,
-			//FIXME:
-			_records: [],
 			//prototype for record
-			_recordproto:   function(_id){return new cow.Socketserver({_id: _id, store: this});},     
-			_dbname:        'socketservers',
-			_type:          'socketservers'
+			recordproto:   function(_id){return new cow.Socketserver({_id: _id, store: this});},     
+			type: 'socketservers'
 		});
 		
 		/*WEBSOCKET*/

@@ -16,15 +16,9 @@ export default class Project extends Record{
 			noIDB: false, 
 			core: self._core, 
 			maxAge: this._maxAge,
-			//FIXME:
-			_records: [],
-			_recordproto: function(_id){return new cow.Group({_id: _id, store: this});},
-			_type: 'groups',
-			_dbname: dbname,
-			_projectid: this._id,
-			dbname:  function(name){
-				this._dbname =  name;
-			}
+			recordproto: function(_id){return new cow.Group({_id: _id, store: this});},
+			type: 'groups',
+			projectid: this._id
 		});
 		
 		dbname = 'items';
@@ -33,18 +27,9 @@ export default class Project extends Record{
 			noIDB: false, 
 			core: self._core, 
 			maxAge: this._maxAge,
-			//FIXME:
-			_recordproto:   function(_id){return new cow.Item({_id: _id, store: this});},
-			_projectid: this._id,
-			_records: [],
-			_type: 'items',
-			_dbname: dbname,
-			/**
-				dbname(string) - set name of dbase
-			**/
-			dbname:  function(name){
-				this._dbname =  name;
-			}
+			recordproto:   function(_id){return new cow.Item({_id: _id, store: this});},
+			projectid: this._id,
+			type: 'items'
 		});
 	};
 

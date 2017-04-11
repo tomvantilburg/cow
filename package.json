@@ -29,7 +29,7 @@
   "scripts": {
   	"lint": "eslint src/cow2.js",
     "pretest": "rm -rf dist && mkdir dist &&  bin/rollup-node &&  rollup --banner \"$(preamble)\" -f umd -n cow -o dist/cow2.js -- index.js",
-    "test": "tape 'test/tape-tests.js' && eslint index.js ./src/record.js",
+    "test": "tape 'tape-tests/*.js' && eslint index.js ./src/record.js",
     "prepublish": "npm run test && uglifyjs --preamble \"$(preamble)\" dist/cow2.js -c -m -o dist/cow2.min.js",
     "postpublishxx": "VERSION=`node -e 'console.log(require(\"./package.json\").version)'`; git push && git push --tags && cd ../cow.github.com && git pull && cp ../cow/dist/cow.js cow.js && cp ../cow/dist/cow.min.js cow.min.js && git add cow.js cow.min.js && git commit -m \"cow ${VERSION}\" && git push && cd - && zip -j dist/cow.zip -- LICENSE README.md dist/cow.js dist/cow.min.js"
   }

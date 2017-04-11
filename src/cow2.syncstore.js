@@ -5,7 +5,11 @@ export default class Syncstore extends Events{
 	constructor(config){
 		super();
 		var self = this;
+		this._records = [];
+		this._recordproto = config.recordproto;
 		this._storename = config.dbname;
+		this._projectid = config.projectid || null;
+		this._type = config.type;
 		this._isloaded = false; //Used in messenger.js to check if store is loaded (workaround)
 		this._core = config.core;
 		this.noDeltas = config.noDeltas || false;

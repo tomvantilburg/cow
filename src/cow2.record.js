@@ -1,5 +1,8 @@
-export default class Record {
+import Events from "./events"
+
+export default class Record extends Events{
 	constructor(){
+		super();
 		this._id    = null  || new Date().getTime().toString();
 		this._dirty = false;
 		this._ttl = null;

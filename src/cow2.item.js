@@ -222,4 +222,3 @@ export default class Item extends Record{
         }
     }
 }
-//_.extend(Cow.item.prototype, Cow.record.prototype);
