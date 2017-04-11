@@ -1,22 +1,7 @@
-var Cow = {};
-
-(function(){
-
-var root = this;
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = Cow || {};
-    }
-    exports.Cow = Cow || {}; 
-} else {
-    root.Cow = Cow || {};
-    root._ = _;
-}
-
-Cow.utils = {
+class Utils {
     //Generate a unique id
-    idgen: function(){
+    idgen(){
         return 'ID'+(Math.random() * 1e17).toString();
     }
-};
-}.call(this));
+}
+export let utils = new Utils();

@@ -1,34 +1,12 @@
-(function(){
+import Record from "./cow2.record";
 
-var root = this;
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = Cow || {};
+export default class Item extends Record{
+	
+	constructor(config){
+		super(config);
+		this._id = config._id  || cow.Utils.idgen();
+		this._store = config.store;
     }
-    exports.Cow = Cow || {}; 
-} else {
-    root.Cow = Cow || {};
-}
-
-Cow.item = function(config){
-    this._id = config._id  || Cow.utils.idgen();
-    this._store = config.store;
-    
-    //FIXME: this might be inherited from cow.record 
-    this._dirty= 'true';
-    this._ttl = this._store.maxAge;
-    this._deleted= false;
-    this._created= new Date().getTime();
-    this._updated= new Date().getTime();
-    this._data  = {};
-    this._deltaq = {}; //delta values to be synced
-    this._deltas = []; //all deltas
-    this._deltasforupload = []; //deltas we still need to give to other peers
-    //END OF FIXME
-    
-};
-Cow.item.prototype = 
-{
     /**
         Function to get or set the permissions:
         permissions() will return an array with all permissions set on this item
@@ -38,7 +16,7 @@ Cow.item.prototype =
         permissions('type',[group]) will add the array of groups to the permissions 
             of type 'type' (and create permission of type 'type' if needed), returns item
     */
-    permissions: function(type,groups) {
+    permissions(type,groups) {
         var self = this;
         switch(arguments.length) {
         case 0:
@@ -63,8 +41,8 @@ Cow.item.prototype =
             throw('wrong argument number');
         }
     
-    },
-    _permissionsByType: function(type) {
+    }
+    _permissionsByType(type) {
         var permissions = this.permissions();
         var returnval = null;
         for (var i=0;i<permissions.length;i++){
@@ -74,8 +52,8 @@ Cow.item.prototype =
             }
         }
         return returnval;
-    },
-    _setPermission: function(type,groups) {
+    }
+    _setPermission(type,groups) {
         var self = this;
         var permission = this._permissionsByType(type);
         var permissions = this.permissions();
@@ -105,12 +83,12 @@ Cow.item.prototype =
         }
         this.data('permissions', permissions);
         return this;
-    },
+    }
     /**
         permissionsHasGroup(type <string>,group <string>) - function to check if a particular type contains a particular group
             returns true if it is the case, false in all other cases
     **/
-    permissionHasGroup: function(type,group) {
+    permissionHasGroup(type,group) {
         var permission  = this.permissions(type);
         var ingroups = [];
         if (group && Array.isArray(group)){
@@ -139,11 +117,11 @@ Cow.item.prototype =
                 return doeshave;
             }
         }
-    },
+    }
     /**
         hasPermission(<string>) - check to see if current user has <string> permission on item
     **/
-    hasPermission: function(type) {
+    hasPermission(type) {
         var core = this._store._core;
         var user = core.user().id();
         //TODO: use the new function
@@ -160,13 +138,13 @@ Cow.item.prototype =
             }
         }
         return hasperm;
-    },
+    }
     /**
         function to remove a group from an permission type, or the entire type
         removePermission('type') removes the entire permission type from the item
         removePermission('type',[groups]) removes the groups from the permission type
     */
-    removePermission: function(type,groups) {
+    removePermission(type,groups) {
         var index, permission, permissions, i;
         switch(arguments.length) {
         case 0:
@@ -243,7 +221,5 @@ Cow.item.prototype =
             throw('wrong argument number');
         }
     }
-};
-_.extend(Cow.item.prototype, Cow.record.prototype);
-
-}.call(this));
+}
+//_.extend(Cow.item.prototype, Cow.record.prototype);

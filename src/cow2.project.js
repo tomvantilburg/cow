@@ -1,70 +1,58 @@
-(function(){
+import Record from "./cow2.record";
+import Syncstore from "./cow2.syncstore";
 
-var root = this;
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = Cow || {};
-    }
-    exports.Cow = Cow || {}; 
-} else {
-    root.Cow = Cow || {};
-}
+export default class Project extends Record{
+	constructor(config){
+		super(config);
+		var self = this;
+		this._id = config._id  || cow.Utils.idgen();;
+		this._store = config.store;
+		this._core = this._store._core;
+		this._maxAge = this._core._maxAge;
+		
+		var dbname = 'groups';
+		this._groupStore = new cow.Syncstore({
+			dbname: dbname, 
+			noIDB: false, 
+			core: self._core, 
+			maxAge: this._maxAge,
+			//FIXME:
+			_records: [],
+			_recordproto: function(_id){return new cow.Group({_id: _id, store: this});},
+			_type: 'groups',
+			_dbname: dbname,
+			_projectid: this._id,
+			dbname:  function(name){
+				this._dbname =  name;
+			}
+		});
+		
+		dbname = 'items';
+		this._itemStore = new cow.Syncstore({
+			dbname: dbname, 
+			noIDB: false, 
+			core: self._core, 
+			maxAge: this._maxAge,
+			//FIXME:
+			_recordproto:   function(_id){return new cow.Item({_id: _id, store: this});},
+			_projectid: this._id,
+			_records: [],
+			_type: 'items',
+			_dbname: dbname,
+			/**
+				dbname(string) - set name of dbase
+			**/
+			dbname:  function(name){
+				this._dbname =  name;
+			}
+		});
+	};
 
-Cow.project = function(config){
-    var self = this;
-    this._id = config._id  || Cow.utils.idgen();;
-    this._store = config.store;
-    this._core = this._store._core;
-    this._maxAge = this._core._maxAge;
-    
-    //FIXME: this might be inherited from cow.record 
-    this._dirty= 'true';
-    this._ttl = this._store._maxAge;
-    this._deleted= false;
-    this._created= new Date().getTime();
-    this._updated= new Date().getTime();
-    this._data  = {};
-    this._deltaq = {}; //delta values to be synced
-    this._deltas = []; //all deltas
-    this._deltasforupload = []; //deltas we still need to give to other peers
-    //END OF FIXME
-    
-    var dbname = 'groups';
-    this._groupStore = _.extend(
-        new Cow.syncstore({dbname: dbname, noIDB: false, core: self._core, maxAge: this._maxAge}),{
-        _records: [],
-        _recordproto: function(_id){return new Cow.group({_id: _id, store: this});},
-        _type: 'groups',
-        _dbname: dbname,
-        _projectid: this._id,
-        dbname:  function(name){
-            this._dbname =  name;
-        }
-    });
-    
-    dbname = 'items';
-    this._itemStore = _.extend(
-        new Cow.syncstore({dbname: dbname, noIDB: false, core: self._core, maxAge: this._maxAge}),{
-        _recordproto:   function(_id){return new Cow.item({_id: _id, store: this});},
-        _projectid: this._id,
-        _records: [],
-        _type: 'items',
-        _dbname: dbname,
-        /**
-            dbname(string) - set name of dbase
-        **/
-        dbname:  function(name){
-            this._dbname =  name;
-        }
-    });
-};
-Cow.project.prototype = 
-{
     /**
         close(bool) - closes the project locally
             Since we don't want to sync the closed status it is written seperately to the database.
     **/
-    closed: function(truefalse){
+    closed(truefalse){
         if (truefalse !== undefined){
             this._closed = truefalse;
             var data = this.deflate();
@@ -75,39 +63,39 @@ Cow.project.prototype =
         else {
             return this._closed;
         }
-    },
+    }
     /**
         groupStore() - return groupStore object
     **/
-    groupStore: function(){
+    groupStore(){
         return this._groupStore;
-    },
+    }
     /**
         groups() - return array of group objects
         groups(id) - returns group with id
         groups({options}) - creates and returns group object
     **/
-    groups: function(data){
+    groups(data){
            return this._groupStore.records(data);
-    },
+    }
     /**
         itemStore() - return itemStore object
     **/
-    itemStore: function(){
+    itemStore(){
         return this._itemStore;
-    },
+    }
     /**
         items() - return array of item objects
         items(id) - returns item with id
         items({options}) - creates and returns item object
     **/
-    items: function(data){
+    items(data){
         return this._itemStore.records(data);
-    },
+    }
     /**
         myGroups() - return the group objects that I am member of
     **/
-    myGroups: function(){
+    myGroups(){
         var groups = this.groups();
         var myid = this._core.user().id();
         var mygroups = [];
@@ -120,5 +108,3 @@ Cow.project.prototype =
         return mygroups;
     }
 };
-_.extend(Cow.project.prototype, Cow.record.prototype);
-}.call(this));

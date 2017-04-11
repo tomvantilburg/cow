@@ -1,1 +1,14 @@
-export {Cow as core} from "./src/cow2.core";
+export {utils as Utils} from "./src/cow2.utils";
+export {default as Events} from "./src/events";
+export {default as Record} from "./src/cow2.record";
+export {default as Item} from "./src/cow2.item";
+export {default as Project} from "./src/cow2.project";
+export {default as Peer} from "./src/cow2.peer";
+export {default as User} from "./src/cow2.user";
+export {default as Group} from "./src/cow2.group";
+export {default as Socketserver} from "./src/cow2.socketserver";
+export {default as Syncstore} from "./src/cow2.syncstore";
+export {default as Messenger} from "./src/cow2.messenger";
+export {default as Websocket} from "./src/cow2.websocket";
+export {default as Localdb} from "./src/cow2.indexeddb";
+export {default as Core} from "./src/cow2.core";

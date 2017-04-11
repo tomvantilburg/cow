@@ -1,40 +1,18 @@
-(function(){
+import Record from "./cow2.record";
 
-var root = this;
-
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = Cow || {};
-    }
-    exports.Cow = Cow || {}; 
-} else {
-    root.Cow = Cow || {};
-}
-
-Cow.group = function(config){
-    this._id = config._id  || Cow.utils.idgen();
-    this._store = config.store;
-    
-    //FIXME: this might be inherited from cow.record 
-    this._dirty= 'true';
-    this._ttl = this._store.maxAge;
-    this._deleted= false;
-    this._created= new Date().getTime();
-    this._updated= new Date().getTime();
-    this._data  = {};
-    this._deltaq = {}; //delta values to be synced
-    this._deltas = []; //all deltas
-    this._deltasforupload = []; //deltas we still need to give to other peers
-    //END OF FIXME
-};
-Cow.group.prototype = 
-{
+export default class Group extends Record{
+	constructor(config){
+		super(config);
+		this._id = config._id  || Cow.utils.idgen();
+		this._store = config.store;
+	};
+	
     /**
         members() - return array of member ids
         members(id) - add id to member array, return group object
         members([id]) - add id's to member array, return group object
     **/
-    members: function(userid){
+    members(userid){
         var self = this;
         switch(arguments.length) {
             case 0:
@@ -58,11 +36,11 @@ Cow.group.prototype =
             default:
                 throw('wrong argument number');
         }
-    },
-    _getMembers: function(){
+    }
+    _getMembers(){
         return this.data('members') || [];
-    },
-    _addMember: function(userid){
+    }
+    _addMember(userid){
         var existing = false;
         var memberList = this.members();
         for (var i=0;i<memberList.length;i++){
@@ -76,11 +54,11 @@ Cow.group.prototype =
             //TODO this.core.trigger('projectListChanged', this.core.UID);
         }
         return userid;
-    },
+    }
     /**
         removeMember(id) - remove id from array of member id's, return group object
     **/
-    removeMember: function(userid){
+    removeMember(userid){
         var core = this._store._core;
         var memberList = this.members();
         for (var i=0;i<memberList.length;i++){
@@ -92,18 +70,18 @@ Cow.group.prototype =
                 return this;
             }
         }
-    },
+    }
     /**
         removeAllMembers() - empty 
     **/
-    removeAllMembers: function(){
+    removeAllMembers(){
         var memberList = [];
         this.data('members', memberList);
         return this;
-    },
+    }
     //Next can be confusing: groups can be member of another group, hence the groups item in a group
     //They are not the same in functionality, the groups is only an array of group id's
-    groups: function(groupid){
+    groups(groupid){
         var self = this;
         switch(arguments.length) {
             case 0:
@@ -123,11 +101,11 @@ Cow.group.prototype =
             default:
                 throw('wrong argument number');
         }
-    },
-    _getGroups: function(){
+    }
+    _getGroups(){
         return this.data('groups') || [];
-    },
-    _addGroup: function(groupid){
+    }
+    _addGroup(groupid){
         var existing = false;
         var groupList = this.groups();
         for (var i=0;i<this.groupList.length;i++){
@@ -142,8 +120,8 @@ Cow.group.prototype =
             //TODO self.core.trigger('projectListChanged', this.core.UID);
         }
         return groupid;
-    },
-    removeGroup: function(groupid){
+    }
+    removeGroup(groupid){
         var groupList = this.groups();
         for (var i=0;i<this.groupList.length;i++){
             if (groupList[i] == groupid) {
@@ -153,14 +131,14 @@ Cow.group.prototype =
                 return;
             }
         }
-    },
-    removeAllGroups: function(){
+    }
+    removeAllGroups(){
         var groupList = [];
         this.data('groups', groupList);
         //self.core.trigger('projectListChanged', this.core.UID);
-    },
+    }
     //Find out if a peer is in a group
-    hasMember: function(peerid){
+    hasMember(peerid){
         //See if member is in this group
         var hasmember = false;
         var memberList = this.members();
@@ -185,5 +163,3 @@ Cow.group.prototype =
         return hasmember;
     }
 };
-_.extend(Cow.group.prototype, Cow.record.prototype);
-}.call(this));
