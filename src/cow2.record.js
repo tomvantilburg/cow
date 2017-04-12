@@ -216,10 +216,10 @@ export default class Record extends Events{
 		else {
 			//Recreate the data based on deltas
 			var returnval = {};
-			var deltas = _.sortBy(this.deltas(), function(d){return d.timestamp;});
+			var deltas = this.deltas().sort((a,b)=> a.timestamp-b.timestamp);
 			deltas.forEach(function(d){
 				if (d.timestamp <= timestamp){
-					_.extend(returnval, d.data);
+					Object.assign(returnval, d.data);
 				}
 			});
 			return returnval;
@@ -240,7 +240,7 @@ export default class Record extends Events{
 		else {
 			//Recreate the deleted status based on deltas
 			var returnval = {};
-			var deltas = _.sortBy(this.deltas(), function(d){return d.timestamp;});
+			var deltas = this.deltas().sort((a,b)=>a.timestamp-b.timestamp);
 			deltas.forEach(function(d){
 				if (d.timestamp <= timestamp){
 					returnval = d.deleted;
@@ -263,7 +263,7 @@ export default class Record extends Events{
 		}
 		else {
 			//get the updater from the deltas
-			var deltas = _.sortBy(this.deltas(), function(d){return d.timestamp;});
+			var deltas = this.deltas().sort((a,b)=>a.timestamp-b.timestamp);
 			deltas.forEach(function(d){
 				if (d.timestamp <= timestamp){
 					//FIXME: return the updater
@@ -359,5 +359,4 @@ export default class Record extends Events{
 		}
 		return this;
 	}
-}
-//TODO_.extend(Cow.record.prototype, Events);
+};

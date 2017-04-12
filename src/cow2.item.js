@@ -221,4 +221,4 @@ export default class Item extends Record{
             throw('wrong argument number');
         }
     }
-}
+};

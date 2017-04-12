@@ -264,11 +264,12 @@ export default class Core extends Events{
         var returnArr = [];
         var peers = this.peers().filter(function(d){return !d.deleted();});
         for (var i = 0;i<peers.length;i++){
-            if (peers[i].user()){
+        	//As user can be logged in to more than one peer, only give unique users
+            if (peers[i].user() && returnArr.indexOf(peers[i].user()) < 0){
                 returnArr.push(peers[i].user());
             }
         }
-        return _.uniq(returnArr); //As user can be logged in to more than one peer, only give unique users
+        return returnArr;
     }
     /** 
         alphaPeer() - return the alpha peer object
@@ -278,7 +279,7 @@ export default class Core extends Events{
     alphaPeer(){
         return this.peers()
         	.filter(d=>d.data('family') == 'alpha' && !d.deleted())
-        	.sort(d=>d.created())[0];
+        	.sort((a,b)=>a.created() - b.created())[0];
     }
     /**
         localdbase() - return the open promise of the localdbase
@@ -317,7 +318,4 @@ export default class Core extends Events{
         return this._websocket.disconnect();
     }
 };
-//Adding some Backbone event binding functionality to the store
-//FIXME_.extend(Cow.core.prototype, Events);
-
 

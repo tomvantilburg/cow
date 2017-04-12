@@ -464,7 +464,7 @@ export default class Syncstore extends Events{
 		var pushlist = [];
 		for (var i=0;i<this._records.length;i++){
 			var localrecord =  this._records[i];
-			for (j=0;j<fidlist.length;j++){
+			for (var j=0;j<fidlist.length;j++){
 				var rem_val = fidlist[j];
 				if (rem_val == localrecord._id){
 					pushlist.push(localrecord.deflate());

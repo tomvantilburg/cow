@@ -329,7 +329,7 @@ export default class Messenger extends Events{
 			var data;
 			//Give the peer information on what will be synced
 			var syncinfo = {
-				IWillSent: _.pluck(syncobject.pushlist,"_id"),
+				IWillSent: syncobject.pushlist.map(d=>d._id),
 				IShallReceive: syncobject.requestlist //TODO: hey, this seems like doubling the functionality of 'wantedList'
 			};
 			data = {
@@ -351,7 +351,7 @@ export default class Messenger extends Events{
 			}
 			
 			syncobject.pushlist.forEach(function(d){
-				msg = {
+				var msg = {
 					"syncType" : payload.syncType,
 					"project" : project,
 					"record" : d
@@ -388,7 +388,7 @@ export default class Messenger extends Events{
 		var store = this._getStore(payload);
 		var returnlist = store.requestRecords(payload.list);
 		returnlist.forEach(function(d){
-			msg = {
+			var msg = {
 				"syncType" : payload.syncType,
 				"project" : store._projectid,
 				"record" : d
@@ -440,19 +440,22 @@ export default class Messenger extends Events{
 		store._commit(); //TODO: we want to do the commit after *all* missingRecords arrived
 		store.trigger('datachange');
 		//TODO: _.without might not be most effective way to purge an array
-		store.syncinfo.toReceive = _.without(store.syncinfo.toReceive,data._id);
+		//REPLACED BY FILTER: store.syncinfo.toReceive = _.without(store.syncinfo.toReceive,data._id);
+		store.syncinfo.toReceive = store.syncinfo.toReceive.filter(d=>d!=data._id);
 		//If there is no more records to be received we can trigger the synced
 		if (store.syncinfo.toReceive.length < 1){
 			store.trigger('synced');
 		}
 		//Do the syncing for the deltas
 		if (data.deltas && record.deltas()){
-			var localarr = _.pluck(record.deltas(),'timestamp');
-			var remotearr = _.pluck(data.deltas,'timestamp');
-			var diff = _.difference(localarr, remotearr);
+			var localarr = record.deltas().map(d=>d.timestamp);
+			var remotearr = data.deltas.map(d=>d.timestamp);
+			//REPLACED BY FILTER var diff = _.difference(localarr, remotearr);
+			var diff1 = localarr.filter(d => !remotearr.includes(item));
+			var diff2 = remotearr.filter(d => !localarr.includes(item));
 			//TODO: nice solution for future, when dealing more with deltas
 			//For now we just respond with a forced sync our own record so the delta's get synced anyway
-			if (diff.length > 0){
+			if (diff1.length > 0 || diff2.length > 0){
 				store.syncRecord(record);
 			}
 		}
