@@ -1,5 +1,3 @@
-import lzwCompress from "lzwcompress";
-
 export default class Messenger{
 
 	constructor(config){

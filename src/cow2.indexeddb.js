@@ -64,6 +64,9 @@ export default class Localdb{
 		record.projectid = projectid;
 		
 		var promise = new Promise(function(resolve, reject){
+			if (!self._db){
+				reject("Database not initialized yet. Hint: Wait for promise?");
+			}
 			var trans = self._db.transaction([storename], "readwrite");
 			trans.onabort = function(e){
 				console.warn('Abort error');

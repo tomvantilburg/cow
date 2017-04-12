@@ -1,6 +1,7 @@
 <html>
 <head></head>
 <body>
+<script type="text/javascript" src="../node_modules/lzwcompress/lzwCompress.js" type="text/javascript"></script>
 <script type="text/javascript" src="../dist/cow2.js" type="text/javascript"></script>
 <script>
 item = new cow.Item({});
@@ -13,7 +14,10 @@ core.projectStore().on('synced', function(){
           console.log('projectstore synced');
 });
 core.projectStore().loaded.then(function(){
-	  console.log('Projectstore loaded');
+	console.log('Projectstore loaded');
+	var project = core.projects({_id:'1'});
+	core.project('1');
+	project.sync();
 });
 core.socketservers({
     _id: 'default',
@@ -21,9 +25,7 @@ core.socketservers({
 });
 core.socketserver('default');
 
-var project = core.projects({_id:'1'});
-core.project('1');
-project.sync();
+
 
 </script>
 </body>
