@@ -272,18 +272,13 @@ export default class Core extends Events{
     }
     /** 
         alphaPeer() - return the alpha peer object
-    **/
-    alphaPeer(){
-        /** 
         peers all have a unique id from the server based on the timestamp
         the peer with the oldest timestamp AND member of the alpha familty is alpha
-        **/
-        var alphaPeers = _.sortBy(
-            this.peers().filter(function(d){
-                return (d.data('family') == 'alpha' && !d.deleted());
-            }),
-            function(d){return d.created();});
-        return alphaPeers[0];
+    **/
+    alphaPeer(){
+        return this.peers()
+        	.filter(d=>d.data('family') == 'alpha' && !d.deleted())
+        	.sort(d=>d.created())[0];
     }
     /**
         localdbase() - return the open promise of the localdbase

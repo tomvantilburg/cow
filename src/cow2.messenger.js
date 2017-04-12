@@ -1,6 +1,9 @@
-export default class Messenger{
+import Events from "./events"
+
+export default class Messenger extends Events{
 
 	constructor(config){
+		super();
 		this._core = config.core;
 		this._numreqs = 0;
 		this._amountreq = 0;
@@ -233,7 +236,7 @@ export default class Messenger{
 			Promise.all(loadarray).then(syncAll);
 		});
 		
-		syncarray = [
+		var syncarray = [
 			this._core.socketserverStore().synced,
 			this._core.peerStore().synced,
 			this._core.userStore().synced,
